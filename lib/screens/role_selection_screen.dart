@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
+import 'job_seeker_signup_screen.dart';
+import 'job_seeker_login_screen.dart';
+import 'recruiter_signup_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -62,7 +65,11 @@ class RoleSelectionScreen extends StatelessWidget {
                 description:
                     'Discover opportunities\nand grow your career.',
                 onTap: () {
-                  // TODO: Navigate to Job Seeker flow
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const JobSeekerSignupScreen()),
+                  );
                 },
               ),
 
@@ -77,7 +84,11 @@ class RoleSelectionScreen extends StatelessWidget {
                 description:
                     'Find top talent and\nmanage your hiring\npipeline.',
                 onTap: () {
-                  // TODO: Navigate to Recruiter flow
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const RecruiterSignupScreen()),
+                  );
                 },
               ),
 
@@ -98,7 +109,11 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // TODO: Navigate to Login screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const JobSeekerLoginScreen()),
+                        );
                       },
                       child: const Text(
                         'Log In',
