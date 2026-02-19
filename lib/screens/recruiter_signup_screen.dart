@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../services/auth_service.dart';
+import '../services/chat_service.dart';
 import 'recruiter_login_screen.dart';
+import 'home_screen.dart';
 
 class RecruiterSignupScreen extends StatefulWidget {
   const RecruiterSignupScreen({super.key});
@@ -19,6 +21,7 @@ class _RecruiterSignupScreenState extends State<RecruiterSignupScreen> {
   final _confirmPasswordController = TextEditingController();
 
   final _authService = AuthService();
+  final _chatService = ChatService();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -43,15 +46,27 @@ class _RecruiterSignupScreenState extends State<RecruiterSignupScreen> {
     }
     setState(() => _isLoading = true);
     try {
-      await _authService.signUpWithEmail(
+      final cred = await _authService.signUpWithEmail(
         name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
       );
-      if (mounted) {
-        _showSnackBar('Recruiter account created! Start hiring 🚀',
-            isSuccess: true);
-        // TODO: Navigate to Recruiter Home Screen
+      if (mounted && cred.user != null) {
+        await _chatService.saveUserProfile(
+          uid: cred.user!.uid,
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          role: 'recruiter',
+          company: _companyController.text.trim(),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecruiterHomeScreen(
+                userName: _nameController.text.trim()),
+          ),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar(e.toString());
@@ -65,8 +80,21 @@ class _RecruiterSignupScreenState extends State<RecruiterSignupScreen> {
     try {
       final result = await _authService.signInWithGoogle();
       if (result != null && mounted) {
-        _showSnackBar('Signed in with Google! 🚀', isSuccess: true);
-        // TODO: Navigate to Recruiter Home Screen
+        final user = result.user!;
+        await _chatService.saveUserProfile(
+          uid: user.uid,
+          name: user.displayName ?? 'Recruiter',
+          email: user.email ?? '',
+          role: 'recruiter',
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecruiterHomeScreen(
+                userName: user.displayName ?? 'Recruiter'),
+          ),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar(e.toString());

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../services/auth_service.dart';
+import '../services/chat_service.dart';
 import 'recruiter_signup_screen.dart';
+import 'home_screen.dart';
 
 class RecruiterLoginScreen extends StatefulWidget {
   const RecruiterLoginScreen({super.key});
@@ -16,6 +18,7 @@ class _RecruiterLoginScreenState extends State<RecruiterLoginScreen> {
   final _passwordController = TextEditingController();
 
   final _authService = AuthService();
+  final _chatService = ChatService();
 
   bool _obscurePassword = true;
   bool _isLoading = false;
@@ -36,8 +39,14 @@ class _RecruiterLoginScreenState extends State<RecruiterLoginScreen> {
         password: _passwordController.text,
       );
       if (mounted) {
-        _showSnackBar('Welcome back! 👋', isSuccess: true);
-        // TODO: Navigate to Recruiter Home Screen
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                RecruiterHomeScreen(userName: 'Recruiter'), // Placeholder name
+          ),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar(e.toString());
@@ -51,8 +60,21 @@ class _RecruiterLoginScreenState extends State<RecruiterLoginScreen> {
     try {
       final result = await _authService.signInWithGoogle();
       if (result != null && mounted) {
-        _showSnackBar('Signed in with Google! 🚀', isSuccess: true);
-        // TODO: Navigate to Recruiter Home Screen
+        final user = result.user!;
+        await _chatService.saveUserProfile(
+          uid: user.uid,
+          name: user.displayName ?? 'Recruiter',
+          email: user.email ?? '',
+          role: 'recruiter',
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecruiterHomeScreen(
+                userName: user.displayName ?? 'Recruiter'),
+          ),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) _showSnackBar(e.toString());
